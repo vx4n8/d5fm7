@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>REKON — RPA Mission Brief</title>
+<meta name="theme-color" content="#ffffff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Mission Brief">
+<link rel="manifest" href="manifest-brief.json">
+<style>
+:root{
+  --blue:#0099FF;--blue-light:#e0f2ff;--blue-mid:#b8ddf8;
+  --bg:#f5f7fa;--white:#ffffff;--text:#111111;
+  --muted:#666666;--hint:#888888;
+  --border:#e0e8f0;--field-bg:#f0f4f8;--field-border:#d0dae8;
+  --danger:#c0392b;--danger-bg:#fdf0f0;--danger-border:#f5c6c6;
+  --success:#1a8048;--success-bg:#e8f7ee;--success-border:#a8dbbe;
+  --accent:#f0a500;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-weight:400;min-height:100vh;}
+/* HEADER */
+header{background:var(--white);padding:24px 40px 0 52px;display:flex;flex-direction:column;}
+header::before{display:none;}
+.logo-wrap{flex-shrink:0;padding-bottom:14px;}
+.logo-wrap svg{width:100%;height:auto;max-height:68px;}
+.header-blue-line{height:1.5px;background:var(--blue);margin:0 -52px 0 -52px;}
+/* SURVEY TITLE */
+.survey-title-bar{background:var(--white);padding:13px 40px;border-bottom:1px solid var(--border);text-align:center;}
+.survey-title-bar h2{font-size:13px;font-weight:500;color:var(--text);letter-spacing:0.1em;text-transform:uppercase;}
+/* MAIN */
+main{max-width:860px;margin:0 auto;padding:20px 20px 60px;}
+/* EDITION LABEL */
+.edition-label{font-size:11px;color:var(--blue);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:10px;padding-left:2px;}
+/* LOADER */
+.loader-panel{background:var(--white);border:1px solid var(--border);border-radius:8px;padding:16px 20px;margin-bottom:16px;}
+.loader-btns{display:flex;gap:8px;flex-wrap:wrap;}
+.loader-btn{display:flex;align-items:center;justify-content:center;gap:7px;padding:10px 16px;border-radius:6px;font-size:0.85rem;font-weight:600;cursor:pointer;transition:all 0.15s;border:1px solid;font-family:inherit;flex:1 1 140px;min-width:0;text-align:center;}
+.loader-btn.new{background:var(--blue);color:var(--white);border-color:var(--blue);}
+.loader-btn.new:hover{background:#0088ee;}
+.loader-btn.load{background:transparent;color:var(--text);border-color:var(--border);}
+.loader-btn.load:hover,.loader-btn.load.active{background:var(--field-bg);border-color:var(--blue);}
+.loader-list{margin-top:14px;}
+.saved-row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:11px 14px;background:var(--field-bg);border:1px solid var(--border);border-radius:6px;margin-bottom:8px;}
+.saved-row.active{border-color:var(--success-border);background:var(--success-bg);}
+.saved-row.active .saved-name{color:var(--success);}
+.saved-info{display:flex;flex-direction:column;gap:3px;flex:1;min-width:0;}
+.saved-name{font-size:0.92rem;color:var(--text);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.saved-meta{font-size:0.75rem;color:var(--muted);}
+.saved-actions{display:flex;gap:7px;flex-shrink:0;}
+.saved-btn{padding:5px 13px;border-radius:5px;font-size:0.8rem;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;cursor:pointer;transition:all 0.13s;border:1px solid;font-family:inherit;}
+.saved-btn.load{border-color:var(--blue-mid);background:var(--blue-light);color:var(--blue);}
+.saved-btn.load:hover{background:var(--blue-mid);}
+.saved-btn.del{border-color:var(--danger-border);background:var(--danger-bg);color:var(--danger);}
+.saved-btn.del:hover{background:#f9d5d5;}
+/* PROGRESS */
+.progress-wrap{background:var(--white);border:1px solid var(--border);border-radius:8px;padding:12px 20px;margin-bottom:12px;display:flex;align-items:center;gap:16px;}
+.progress-label{font-size:0.78rem;color:var(--blue);letter-spacing:0.1em;text-transform:uppercase;white-space:nowrap;}
+.progress-track{flex:1;height:4px;background:var(--blue-light);border-radius:2px;overflow:hidden;}
+.progress-fill{height:100%;background:var(--blue);border-radius:2px;transition:width 0.4s;width:0%;}
+.progress-pct{font-size:0.95rem;font-weight:600;color:var(--blue);min-width:36px;text-align:right;}
+/* SECTIONS */
+.section{background:var(--white);border:1px solid var(--border);border-radius:8px;margin-bottom:14px;overflow:hidden;}
+.section-header{background:var(--white);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;gap:12px;}
+.section-header.collapsible{cursor:pointer;user-select:none;}
+.section-header.collapsible:hover{background:var(--field-bg);}
+.section-num{background:var(--blue-light);color:#0077cc;font-weight:700;font-size:0.8rem;width:26px;height:26px;border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.section-title{font-size:0.85rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);}
+.section-tag{margin-left:auto;font-size:0.7rem;color:var(--hint);letter-spacing:0.1em;text-transform:uppercase;}
+.collapse-icon{margin-left:auto;color:var(--hint);font-size:1rem;transition:transform 0.25s;flex-shrink:0;line-height:1;}
+.section-tag+.collapse-icon{margin-left:10px;}
+.section.collapsed .collapse-icon{transform:rotate(-90deg);}
+.section-body{padding:20px;}
+.section.collapsed .section-body{display:none;}
+/* FIELDS */
+.sub-label{font-size:0.75rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--blue);margin:18px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+.sub-label:first-child{margin-top:0;}
+.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.field-grid.triple{grid-template-columns:1fr 1fr 1fr;}
+.field{display:flex;flex-direction:column;gap:5px;}
+.field.full{grid-column:1/-1;}
+label{font-size:0.72rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--blue);}
+input[type=text],input[type=email],input[type=tel],input[type=date],input[type=time],input[type=number],textarea,select{background:var(--field-bg);border:1px solid var(--field-border);border-radius:5px;color:var(--text);font-family:inherit;font-size:0.92rem;padding:9px 13px;outline:none;transition:border-color 0.2s,box-shadow 0.2s;width:100%;}
+input:focus,textarea:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,153,255,0.1);}
+textarea{resize:none;min-height:70px;overflow:hidden;}
+select option{background:var(--white);color:var(--text);}
+input[type=date]::-webkit-calendar-picker-indicator,input[type=time]::-webkit-calendar-picker-indicator{cursor:pointer;opacity:0.5;}
+.section-notes{margin-top:16px;padding-top:14px;border-top:1px solid var(--border);}
+.section-notes label{display:block;margin-bottom:6px;}
+.section-notes textarea{min-height:64px;font-size:0.88rem;}
+/* YES/NO */
+.yn-list{display:flex;flex-direction:column;}
+.yn-item{border-bottom:1px solid var(--border);}
+.yn-item:last-child{border-bottom:none;}
+.yn-row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:10px 12px;background:var(--white);transition:background 0.15s;}
+.yn-row:hover{background:var(--field-bg);}
+.yn-question{font-size:0.88rem;color:var(--text);flex:1;line-height:1.4;}
+.yn-btns{display:flex;gap:6px;flex-shrink:0;}
+.yn-btn{padding:4px 13px;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:0.8rem;font-weight:600;letter-spacing:0.08em;cursor:pointer;transition:all 0.13s;font-family:inherit;}
+.yn-btn:hover{border-color:var(--blue);color:var(--blue);}
+.yn-btn.yes{background:var(--success-bg);border-color:var(--success-border);color:var(--success);}
+.yn-btn.no{background:var(--danger-bg);border-color:var(--danger-border);color:var(--danger);}
+/* TOGGLE GROUP */
+.toggle-group{display:flex;flex-wrap:wrap;gap:8px;}
+.toggle-option{display:flex;align-items:center;gap:7px;padding:7px 13px;border:1px solid var(--field-border);border-radius:5px;background:var(--field-bg);cursor:pointer;font-size:0.85rem;color:var(--text);transition:all 0.15s;font-family:inherit;}
+.toggle-option input{display:none;}
+.toggle-option.selected{border-color:var(--blue);background:var(--blue-light);color:var(--blue);font-weight:600;}
+.toggle-option:hover{border-color:var(--blue-mid);}
+/* CHECK ITEMS */
+.check-list{display:flex;flex-direction:column;gap:0;}
+.check-item-row{display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid var(--border);cursor:pointer;user-select:none;transition:background 0.15s;}
+.check-item-row:last-child{border-bottom:none;}
+.check-item-row:hover{background:var(--field-bg);}
+.check-item-row.checked{background:var(--success-bg);}
+.check-item-row.checked .check-box{background:var(--blue);border-color:var(--blue);}
+.check-item-row.checked .check-box::after{content:'';display:block;width:5px;height:9px;border:2px solid #fff;border-top:none;border-left:none;transform:rotate(45deg) translateY(-1px);}
+.check-item-row.checked .check-label{color:var(--muted);text-decoration:line-through;}
+.check-box{width:20px;height:20px;min-width:20px;border-radius:4px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;margin-top:1px;flex-shrink:0;}
+.check-label{font-size:0.88rem;line-height:1.45;color:var(--text);}
+/* BUTTONS */
+.action-wrap{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:36px;margin-bottom:40px;}
+.btn-gold{background:var(--blue);color:var(--white);font-size:1rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;border:none;padding:14px 32px;border-radius:7px;cursor:pointer;transition:background 0.2s;font-family:inherit;}
+.btn-gold:hover{background:#0088ee;}
+.btn-outline{background:transparent;color:var(--blue);font-size:1rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;border:1px solid var(--blue-mid);padding:13px 32px;border-radius:7px;cursor:pointer;transition:all 0.2s;font-family:inherit;}
+.btn-outline:hover{background:var(--blue-light);border-color:var(--blue);}
+/* SAVE */
+.save-section{background:var(--white);border:1px solid var(--border);border-radius:8px;margin-bottom:14px;overflow:hidden;}
+.save-section .section-header{background:var(--white);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;gap:12px;}
+.save-section .section-body{padding:20px;}
+/* COMPLIANCE */
+.compliance-box{background:var(--field-bg);border:1px solid var(--field-border);border-radius:6px;padding:18px 20px;margin-bottom:16px;font-size:0.88rem;color:var(--text);line-height:1.7;}
+.compliance-check{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;background:var(--blue-light);border:1.5px solid var(--blue-mid);border-radius:6px;cursor:pointer;transition:all 0.15s;margin-top:4px;}
+.compliance-check.checked{border-color:var(--success-border);background:var(--success-bg);}
+.compliance-check-box{width:22px;height:22px;min-width:22px;border-radius:4px;border:2px solid var(--blue-mid);display:flex;align-items:center;justify-content:center;margin-top:1px;flex-shrink:0;background:var(--white);transition:all 0.15s;}
+.compliance-check.checked .compliance-check-box{background:var(--success);border-color:var(--success);}
+.compliance-check.checked .compliance-check-box::after{content:'';display:block;width:6px;height:10px;border:2px solid #fff;border-top:none;border-left:none;transform:rotate(45deg) translateY(-1px);}
+.compliance-check-label{font-size:0.88rem;line-height:1.55;color:var(--text);}
+/* FOOTER */
+footer{text-align:center;padding:22px 20px;color:var(--hint);font-size:0.75rem;letter-spacing:0.05em;border-top:1px solid var(--border);background:var(--white);}
+.footer-inner{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px;}
+.footer-inner a{display:inline-flex;align-items:center;gap:4px;color:var(--hint);text-decoration:none;transition:color 0.2s;}
+.footer-inner a:hover{color:var(--blue);}
+.footer-sep{opacity:0.4;}
+@media(max-width:600px){
+  .field-grid,.field-grid.triple{grid-template-columns:1fr;}
+  header{padding:16px 20px 0;}
+  .header-blue-line{margin:0 -20px;}
+  .survey-title-bar{padding:12px 20px;}
+  main{padding:16px 14px 60px;}
+  .yn-row{flex-wrap:wrap;gap:8px;}
+  .yn-btns{width:100%;justify-content:flex-start;}
+  .loader-btns{flex-direction:column;}
+  .loader-btn{width:100%;min-width:0;flex:none;}
+  .toggle-group{flex-direction:column;}
+}
+@media print{
+  body{background:white!important;color:#000;}
+  header{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  .action-wrap,.loader-panel,.progress-wrap{display:none!important;}
+  .section.collapsed .section-body{display:block!important;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-wrap">
+    <svg width="100%" viewBox="0 0 900 100" xmlns="http://www.w3.org/2000/svg">
+      <text x="14" y="82" style="font-size:88px;font-weight:300;fill:#111;font-family:sans-serif;">R</text>
+      <text x="84" y="82" style="font-size:88px;font-weight:300;fill:#111;font-family:sans-serif;">E</text>
+      <text x="196" y="82" text-anchor="middle" style="font-size:88px;font-weight:300;fill:#0099FF;font-family:sans-serif;">K</text>
+      <text x="248" y="82" style="font-size:88px;font-weight:300;fill:#111;font-family:sans-serif;">O</text>
+      <text x="324" y="82" style="font-size:88px;font-weight:300;fill:#111;font-family:sans-serif;">N</text>
+      <text x="396" y="88" style="font-size:14px;font-weight:400;fill:#999999;font-family:sans-serif;">©</text>
+      <line x1="420" y1="14" x2="420" y2="90" stroke="#ccc" stroke-width="1"/>
+      <text x="434" y="52" style="font-size:15px;font-weight:400;fill:#888;font-family:sans-serif;letter-spacing:0.14em;">MISSION BRIEF,</text>
+      <text x="434" y="76" style="font-size:15px;font-weight:400;fill:#0099FF;font-family:sans-serif;letter-spacing:0.14em;">REDESIGNED</text>
+    </svg>
+  </div>
+  <div class="header-blue-line"></div>
+</header>
+
+<div class="survey-title-bar">
+  <h2>RPA Aerial Services — Mission Brief</h2>
+</div>
+
+<main>
+  <div class="edition-label">Client Intake Edition</div>
+
+  <!-- LOADER -->
+  <div class="loader-panel" id="loaderPanel">
+    <div class="loader-btns">
+      <button class="loader-btn new" onclick="newBrief()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New Brief
+      </button>
+      <button class="loader-btn load" id="btnLoadBrief" onclick="toggleLoader()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>Load Brief
+      </button>
+      <button class="loader-btn load" onclick="document.getElementById('importInput').click()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Import Brief
+      </button>
+      <input type="file" id="importInput" accept=".json" style="display:none" onchange="importBrief(this)">
+    </div>
+    <div class="loader-list" id="loaderList" style="display:none;"></div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="progress-wrap">
+    <span class="progress-label">Completion</span>
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    <span class="progress-pct" id="progressPct">0%</span>
+  </div>
+
+  <!-- SEC 0: CLIENT DETAILS -->
+  <div class="section" id="sec0">
+    <div class="section-header collapsible" onclick="toggleSection('sec0')">
+      <div class="section-num">0</div>
+      <div class="section-title">Client Details</div>
+      <span class="collapse-icon">&#9660;</span>
+    </div>
+    <div class="section-body">
+      <div class="field-grid">
+        <div class="field"><label>First Name</label><input type="text" id="f_firstName" placeholder="First name" oninput="triggerAutosave()"></div>
+        <div class="field"><label>Last Name</label><input type="text" id="f_lastName" placeholder="Last name" oninput="triggerAutosave()"></div>
+        <div class="field"><label>Email Address</label><input type="email" id="f_email" placeholder="your@email.com" oninput="triggerAutosave()"></div>
+        <div class="field"><label>Phone Number</label><input type="tel" id="f_phone" placeholder="+61 4xx xxx xxx" oninput="triggerAutosave()"></div>
+        <div class="field full"><label>Company / Organisation</label><input type="text" id="f_company" placeholder="Company or organisation name (if applicable)" oninput="triggerAutosave()"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEC 1: MISSION LOCATION -->
+  <div class="section collapsed" id="sec1">
+    <div class="section-header collapsible" onclick="toggleSection('sec1')">
+      <div class="section-num">1</div>
+      <div class="section-title">Mission Location</div>
+      <span class="collapse-icon">&#9660;</span>
+    </div>
+    <div class="section-body">
+      <div class="field-grid">
+        <div class="field full"><label>Street Address</label><input type="text" id="f_address" placeholder="Street address" oninput="triggerAutosave()"></div>
+        <div class="field"><label>Property Type</label>
+          <select id="f_propertyType" onchange="triggerAutosave()">
+            <option value="">— Select —</option>
+            <option>Residential</option>
+            <option>Rural / Agricultural</option>
+            <option>Commercial</option>
+            <option>Industrial</option>
+            <option>Infrastructure</option>
+            <option>Public Land / Council</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="field"><label>Suburb / Town</label><input type="text" id="f_suburb" placeholder="Suburb" oninput="triggerAutosave()"></div>
+        <div class="field"><label>State</label>
+          <select id="f_state" onchange="triggerAutosave()">
+            <option value="">— Select —</option>
+            <option>QLD</option><option>NSW</option><option>VIC</option>
+            <option>SA</option><option>WA</option><option>TAS</option>
+            <option>ACT</option><option>NT</option>
+          </select>
+        </div>
+        <div class="field full"><label>Site Access Notes</label><input type="text" id="f_siteAccess" placeholder="Gate codes, entry instructions, parking…" oninput="triggerAutosave()"></div>
+        <div class="field full"><label>GPS Coordinates (if remote location)</label><input type="text" id="f_coords" placeholder="e.g. -27.4705, 153.0260 or What3Words" oninput="triggerAutosave()"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEC 2: ON-SITE CONTACTS -->
+  <div class="section collapsed" id="sec2">
+    <div class="section-header collapsible" onclick="toggleSection('sec2')">
+      <div class="section-num">2</div>
+      <div class="section-title">On-Site Contacts</div>
+      <span class="collapse-icon">&#9660;</span>
+    </div>
+    <div class="section-body">
+      <div class="field-grid triple">
+        <div class="field"><label>On-Site Contact Name</label><input type="text" id="f_onSiteName" placeholder="Contact name on the day" oninput="triggerAutosave()"></div>
+        <div class="field"><label>On-Site Contact Phone</label><input type="tel" id="f_onSitePhone" placeholder="+61 4xx xxx xxx" oninput="triggerAutosave()"></div>
+        <div class="field"><label>Role / Relationship to Property</label><input type="text" id="f_onSiteRole" placeholder="e.g. Site manager, owner" oninput="triggerAutosave()"></div>
+      </div>
+      <div class="sub-label" style="margin-top:18px;">Secondary Contact <span style="font-weight:400;color:var(--hint);text-transform:none;letter-spacing:0;">(optional)</span></div>
+      <div class="field-grid triple">
+        <div class="field"><label>Name</label><input type="text" id="f_sec2Name" placeholder="Secondary contact name" oninput="triggerAutosave()"></div>
+        <div class="field"><label>Phone</label><input type="tel" id="f_sec2Phone" placeholder="+61 4xx xxx xxx" oninput="triggerAutosave()"></div>
+        <div class="field"><label>Role</label><input type="text" id="f_sec2Role" placeholder="e.g. Property owner, project manager" oninput="triggerAutosave()"></div>
+      </div>
+      <div class="section-notes">
+        <label>Additional Contact Notes</label>
+        <textarea id="n_contacts" placeholder="Any additional contact or access information…" oninput="autoResize(this);triggerAutosave()"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEC 3: PROPERTY PERMISSION -->
+  <div class="section collapsed" id="sec3">
+    <div class="section-header collapsible" onclick="toggleSection('sec3')">
+      <div class="section-num">3</div>
+      <div class="section-title">Property Permission</div>
+      <span class="collapse-icon">&#9660;</span>
+    </div>
+    <div class="section-body">
+      <div class="sub-label">Who has authorised aerial operations over this property?</div>
+      <div class="toggle-group" id="tg_permission">
+        <div class="toggle-option" data-group="permission" data-val="owner" onclick="selectToggle(this)"><input type="radio" name="permission" value="owner">I am the property owner</div>
+        <div class="toggle-option" data-group="permission" data-val="authorised" onclick="selectToggle(this)"><input type="radio" name="permission" value="authorised">I have written authorisation from the owner</div>
+        <div class="toggle-option" data-group="permission" data-val="council" onclick="selectToggle(this)"><input type="radio" name="permission" value="council">Public land / council property — approval obtained</div>
+        <div class="toggle-option" data-group="permission" data-val="other" onclick="selectToggle(this)"><input type="radio" name="permission" value="other">Other (explain below)</div>
+      </div>
+      <div class="section-notes">
+        <label>Permission Notes</label>
+        <textarea id="f_permissionNotes" placeholder="Any additional details regarding property authorisation…" oninput="autoResize(this);triggerAutosave()"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEC 4: MISSION TIMING -->
+  <div class="section collapsed" id="sec4">
+    <div class="section-header collapsible" onclick="toggleSection('sec4')">
+      <div class="section-num">4</div>
+      <div class="section-title">Mission Timing</div>
+      <span class="collapse-icon">&#9660;</span>
+    </div>
+    <div class="section-body">
+      <div class="field-grid">
+        <div class="field"><label>Requested Date</label><input type="date" id="f_missionDate" oninput="triggerAutosave()"></div>
+        <div class="field"><label>Alternative / Backup Date</label><input type="date" id="f_altDate" oninput="triggerAutosave()"></div>
+        <div class="field full"><label>Preferred Time of Day</label>
+          <div class="toggle-group" id="tg_timeOfDay">
+            <div class="toggle-option" data-group="timeOfDay" data-val="Early morning" onclick="selectToggle(this)">Early morning</div>
+            <div class="toggle-option" data-group="timeOfDay" data-val="Morning" onclick="selectToggle(this)">Morning</div>
+            <div class="toggle-option" data-group="timeOfDay" data-val="Afternoon" onclick="selectToggle(this)">Afternoon</div>
+            <div class="toggle-option" data-group="timeOfDay" data-val="Flexible" onclick="selectToggle(this)">Flexible</div>
+          </div>
+        </div>
+        <div class="field"><label>Estimated Duration on Site</label>
+          <select id="f_duration" onchange="triggerAutosave()">
+            <option value="">— Select —</option>
+            <option>Less than 1 hour</option>
+            <option>1–2 hours</option>
+            <option>2–4 hours</option>
+            <option>Half day</option>
+            <option>Full day</option>
+            <option>Multiple days</option>
+          </select>
+        </div>
+        <div class="field"><label>Deadline / Delivery Date Required By</label><input type="date" id="f_deadline" oninput="triggerAutosave()"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEC 5: WHAT DO YOU NEED? -->
+  <div class="section collapsed" id="sec5">
+    <div class="section-header collapsible" onclick="toggleSection('sec5')">
+      <div class="section-num">5</div>
+      <div class="section-title">What Do You Need?</div>
+      <span class="collapse-icon">&#9660;</span>
+    </div>
+    <div class="section-body">
+      <div class="sub-label">Type of Mission (select all that apply)</div>
+      <div class="check-list" id="cl_missionType"></div>
+      <div class="sub-label" style="margin-top:18px;">Will the property owner be present on the day?</div>
+      <div class="toggle-group" id="tg_ownerPresent">
+        <div class="toggle-option" data-group="ownerPresent" data-val="yes" onclick="selectToggle(this)">Yes</div>
+        <div class="toggle-option" data-group="ownerPresent" data-val="no" onclick="selectToggle(this)">No</div>
+        <div class="toggle-option" data-group="ownerPresent" data-val="unsure" onclick="selectToggle(this)">Not sure yet</div>
+      </div>
+      <div class="section-notes">
+        <label>Other / Additional Details</label>
+        <textarea id="f_missionTypeOther" placeholder="Describe any specific requirements…" oninput="autoResize(this);triggerAutosave()"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEC 6: DELIVERABLES — FORMAT -->
+  <div class="section collapsed" id="sec6">
+    <div class="section-header collapsible" onclick="toggleSection('sec6')">
+      <div class="section-num">6</div>
+      <div class="section-title">Deliverables — Format</div>
+      <span class="collapse-icon">&#9660;</span>
+    </div>
+    <div class="section-body">
+      <div class="sub-label">Format Required (select all that apply)</div>
+      <div class="check-list" id="cl_deliverables"></div>
+      <div style="margin-top:12px;padding:10px 14px;background:var(--blue-light);border:1px solid var(--blue-mid);border-radius:6px;font-size:0.82rem;color:var(--muted);line-height:1.5;">
+        <strong style="color:var(--blue);">Default file formats:</strong> Photos are delivered as high-resolution JPEG. Video is delivered as MP4. If you need RAW or TIFF files, please select below.
+      </div>
+      <div class="field-grid" style="margin-top:14px;">
+        <div class="field full"><label>Premium Format Upgrade (optional)</label>
+          <div class="toggle-group" id="tg_rawUpgrade">
+            <div class="toggle-option" data-group="rawUpgrade" data-val="RAW photos" onclick="selectToggle(this)">RAW Photos</div>
+            <div class="toggle-option" data-group="rawUpgrade" data-val="TIFF photos" onclick="selectToggle(this)">TIFF Photos</div>
+            <div class="toggle-option" data-group="rawUpgrade" data-val="MOV video" onclick="selectToggle(this)">MOV Video</div>
+            <div class="toggle-option" data-group="rawUpgrade" data-val="Not required" onclick="selectToggle(this)">Not required — JPEG / MP4 is fine</div>
+          </div>
+        </div>
+        <div class="field"><label>Turnaround Time Needed</label>
+          <select id="f_turnaround" onchange="triggerAutosave()">
+            <option value="">— Select —</option>
+            <option>48 hours</option>
+            <option>Within the week</option>
+            <option>No rush — within 2 weeks</option>
+            <option>Specific date (noted above)</option>
+          </select>
+        </div>
+        <div class="field full"><label>Specific Shots or Angles Required</label>
+          <textarea id="f_specificShots" placeholder="e.g. North-facing elevation, roof detail close-ups, wide establishing shot from the east…" oninput="autoResize(this);triggerAutosave()"></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEC 7: SITE INFORMATION (YES/NO) -->
+  <div class="section collapsed" id="sec7">
+    <div class="section-header collapsible" onclick="toggleSection('sec7')">
+      <div class="section-num">7</div>
+      <div class="section-title">Site Information</div>
+      <span class="section-tag">Yes / No</span>
+      <span class="collapse-icon">&#9660;</span>
+    </div>
+    <div class="section-body">
+      <p style="font-size:0.82rem;color:var(--muted);margin-bottom:14px;">Answer Yes or No for each item. This helps with safe mission planning.</p>
+      <div class="yn-list" id="yn_site"></div>
+      <div class="section-notes">
+        <label>Site Hazard Notes</label>
+        <textarea id="n_siteHazards" placeholder="Describe any hazards or concerns identified above…" oninput="autoResize(this);triggerAutosave()"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEC 8: CONDITIONS & COMPLIANCE -->
+  <div class="section collapsed" id="sec8">
+    <div class="section-header collapsible" onclick="toggleSection('sec8')">
+      <div class="section-num">8</div>
+      <div class="section-title">Conditions &amp; Compliance</div>
+      <span class="collapse-icon">&#9660;</span>
+    </div>
+    <div class="section-body">
+      <div class="compliance-box">
+        By submitting this form, you confirm that:<br><br>
+        • All information provided is accurate and complete to the best of your knowledge.<br>
+        • You have the authority to request aerial operations at the stated location.<br>
+        • You understand that all flights are conducted in accordance with CASA regulations and applicable Australian law.<br>
+        • You accept that Patrice Roblin reserves the right to decline or postpone any mission deemed unsafe, non-compliant, or operationally unsuitable.<br>
+        • Weather, airspace restrictions, or other safety factors may require rescheduling at short notice.<br>
+        • Any imagery captured remains the property of Patrice Roblin until full payment is received.
+      </div>
+      <div class="compliance-check" id="complianceCheck" onclick="toggleCompliance()">
+        <div class="compliance-check-box" id="complianceBox"></div>
+        <div class="compliance-check-label"><strong>I confirm</strong> that I have read and agree to the above conditions, and that all information provided in this form is accurate.</div>
+      </div>
+      <div class="section-notes">
+        <label>Additional Notes or Special Requests</label>
+        <textarea id="f_additionalNotes" placeholder="Anything else we should know…" oninput="autoResize(this);triggerAutosave()"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- SAVE -->
+  <div class="save-section">
+    <div class="section-header"><div class="section-num" style="font-size:1rem;">&#9733;</div><div class="section-title">Save</div></div>
+    <div class="section-body">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">
+        <div class="field" style="flex:1;min-width:200px;"><label>Brief Name</label><input type="text" id="saveName" placeholder="e.g. Smith — 123 Main St, Paddington"></div>
+        <button id="btnSave" class="btn-gold" style="padding:10px 24px;font-size:0.9rem;white-space:nowrap;flex-shrink:0;" onclick="saveBrief()">Save Brief</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="action-wrap">
+    <button class="btn-gold" onclick="generateChecklist()">Generate Pilot Checklist</button>
+    <button class="btn-outline" onclick="exportBrief()">Export / Share JSON</button>
+  </div>
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <span>&copy; 2026 Patrice Roblin</span><span class="footer-sep">|</span>
+    <a href="tel:0402096781">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+      +61 0402 096 781
+    </a><span class="footer-sep">|</span>
+    <a href="mailto:roblinpatrice@gmail.com">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,12 2,6"/></svg>
+      roblinpatrice@gmail.com
+    </a><span class="footer-sep">|</span>
+    <a href="https://patriceroblin.com" target="_blank">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+      patriceroblin.com
+    </a>
+  </div>
+</footer>
+
+<script>
+// ─── DATA ────────────────────────────────────────────────────
+var missionTypeItems=[
+  'Construction progress monitoring',
+  'Visual documentation of property condition',
+  'Post-storm / post-event aerial documentation',
+  'Agricultural / rural aerial documentation',
+  'Infrastructure aerial documentation',
+  'Roof aerial documentation',
+  'Aerial overview / land mapping',
+  'Real estate documentation',
+  'Marketing / promotional content',
+  'Other'
+];
+var deliverableItems=[
+  'Photos',
+  'Video',
+  'Both photos and video',
+  'Edited / colour graded',
+  'Raw files',
+  'Online gallery'
+];
+var siteQuestions=[
+  'Any known hazards on site? (holes, unstable ground, chemicals, machinery etc.)',
+  'Power lines or antennas nearby?',
+  'Animals or livestock on or near the property?',
+  'Any restricted areas we should be aware of?',
+  'Neighbouring properties to be aware of?',
+  'Children likely to be present on site?',
+  'Active workers or crew on site during the mission?'
+];
+
+// ─── TOGGLE STATE ────────────────────────────────────────────
+var _toggleState={permission:null,timeOfDay:null,ownerPresent:null,rawUpgrade:null};
+function selectToggle(el){
+  var group=el.dataset.group;
+  var val=el.dataset.val;
+  var cur=_toggleState[group];
+  // Deselect all in group
+  document.querySelectorAll('.toggle-option[data-group="'+group+'"]').forEach(function(o){o.classList.remove('selected');});
+  if(cur===val){_toggleState[group]=null;}
+  else{_toggleState[group]=val;el.classList.add('selected');}
+  triggerAutosave();
+}
+
+// ─── CHECK ITEM BUILDER (multi-select) ───────────────────────
+var _checkState={};
+function buildCheckItems(containerId,items){
+  var el=document.getElementById(containerId);if(!el)return;
+  if(!_checkState[containerId])_checkState[containerId]={};
+  el.innerHTML='';
+  items.forEach(function(item,i){
+    var row=document.createElement('div');
+    row.className='check-item-row'+(_checkState[containerId][i]?' checked':'');
+    var box=document.createElement('div');box.className='check-box';
+    var lbl=document.createElement('span');lbl.className='check-label';lbl.textContent=item;
+    row.appendChild(box);row.appendChild(lbl);
+    row.onclick=function(){
+      _checkState[containerId][i]=!_checkState[containerId][i];
+      row.classList.toggle('checked',_checkState[containerId][i]);
+      updateProgress();triggerAutosave();
+    };
+    el.appendChild(row);
+  });
+}
+
+// ─── YES/NO BUILDER ──────────────────────────────────────────
+var _ynState={};
+function buildYN(containerId,questions){
+  var el=document.getElementById(containerId);if(!el)return;
+  if(!_ynState[containerId])_ynState[containerId]={};
+  el.innerHTML='';
+  questions.forEach(function(q,i){
+    var item=document.createElement('div');item.className='yn-item';
+    var row=document.createElement('div');row.className='yn-row';
+    var qEl=document.createElement('span');qEl.className='yn-question';qEl.textContent=q;
+    var btns=document.createElement('div');btns.className='yn-btns';
+    var yBtn=document.createElement('button');yBtn.className='yn-btn';yBtn.textContent='YES';
+    var nBtn=document.createElement('button');nBtn.className='yn-btn';nBtn.textContent='NO';
+    if(_ynState[containerId][i]==='yes')yBtn.classList.add('yes');
+    if(_ynState[containerId][i]==='no')nBtn.classList.add('no');
+    yBtn.onclick=function(){setYN(containerId,i,yBtn,nBtn,'yes');};
+    nBtn.onclick=function(){setYN(containerId,i,yBtn,nBtn,'no');};
+    btns.appendChild(yBtn);btns.appendChild(nBtn);
+    row.appendChild(qEl);row.appendChild(btns);
+    item.appendChild(row);el.appendChild(item);
+  });
+}
+function setYN(cid,idx,yBtn,nBtn,val){
+  if(!_ynState[cid])_ynState[cid]={};
+  var cur=_ynState[cid][idx];
+  if(cur===val){_ynState[cid][idx]=null;yBtn.classList.remove('yes');nBtn.classList.remove('no');}
+  else{
+    _ynState[cid][idx]=val;
+    if(val==='yes'){yBtn.classList.add('yes');nBtn.classList.remove('no');}
+    else{nBtn.classList.add('no');yBtn.classList.remove('yes');}
+  }
+  updateProgress();triggerAutosave();
+}
+
+// ─── COMPLIANCE ──────────────────────────────────────────────
+var _compliance=false;
+function toggleCompliance(){
+  _compliance=!_compliance;
+  var el=document.getElementById('complianceCheck');
+  var box=document.getElementById('complianceBox');
+  if(el)el.classList.toggle('checked',_compliance);
+  updateProgress();triggerAutosave();
+}
+
+// ─── ACCORDION ───────────────────────────────────────────────
+function toggleSection(id){
+  var t=document.getElementById(id);if(!t)return;
+  var wasOpen=!t.classList.contains('collapsed');
+  document.querySelectorAll('.section').forEach(function(s){
+    if(s.querySelector('.section-header.collapsible'))s.classList.add('collapsed');
+  });
+  if(!wasOpen){
+    t.classList.remove('collapsed');
+    setTimeout(function(){t.scrollIntoView({behavior:'smooth',block:'start'});},50);
+  }
+}
+
+// ─── AUTO RESIZE ─────────────────────────────────────────────
+function autoResize(el){el.style.height='auto';el.style.height=el.scrollHeight+'px';}
+
+// ─── HELPERS ─────────────────────────────────────────────────
+function v(id){var el=document.getElementById(id);return el?el.value:'';}
+function sv(id,val){var el=document.getElementById(id);if(el){el.value=val||'';if(el.tagName==='TEXTAREA')autoResize(el);}}
+
+// ─── PROGRESS ────────────────────────────────────────────────
+function updateProgress(){
+  var total=0,done=0;
+  var fields=['f_firstName','f_lastName','f_email','f_address','f_missionDate'];
+  fields.forEach(function(id){total++;if(v(id))done++;});
+  total++;if(_toggleState.permission)done++;
+  total++;if(_compliance)done++;
+  var ynSt=_ynState['yn_site']||{};
+  siteQuestions.forEach(function(_,i){total++;if(ynSt[i])done++;});
+  var fill=document.getElementById('progressFill');
+  var pctEl=document.getElementById('progressPct');
+  var pct=total>0?Math.round(done/total*100):0;
+  if(fill)fill.style.width=pct+'%';
+  if(pctEl)pctEl.textContent=pct+'%';
+}
+
+// ─── AUTOSAVE ────────────────────────────────────────────────
+var _autosaveTimer=null;
+function triggerAutosave(){
+  clearTimeout(_autosaveTimer);
+  _autosaveTimer=setTimeout(function(){autoSave();},1200);
+  updateProgress();
+}
+var _currentName=null;
+function autoSave(){
+  if(!_currentName)return;
+  var briefs=getBriefs();
+  var idx=briefs.findIndex(function(m){return m.name===_currentName;});
+  if(idx<0)return;
+  briefs[idx].state=collectState();
+  briefs[idx].updated=new Date().toISOString();
+  saveBriefs(briefs);
+}
+
+// ─── SAVE / LOAD ─────────────────────────────────────────────
+function getBriefs(){try{return JSON.parse(localStorage.getItem('brief_missions')||'[]');}catch(e){return[];}}
+function saveBriefs(a){localStorage.setItem('brief_missions',JSON.stringify(a));}
+
+function collectState(){
+  var state={fields:{},toggles:JSON.parse(JSON.stringify(_toggleState)),yn:JSON.parse(JSON.stringify(_ynState)),checks:JSON.parse(JSON.stringify(_checkState)),compliance:_compliance};
+  document.querySelectorAll('input[id],textarea[id],select[id]').forEach(function(el){
+    if(el.id&&el.id!=='saveName'&&el.id!=='importInput')state.fields[el.id]=el.value;
+  });
+  return state;
+}
+
+function restoreState(state){
+  if(!state)return;
+  if(state.fields){Object.keys(state.fields).forEach(function(id){sv(id,state.fields[id]);});}
+  if(state.toggles){
+    _toggleState=state.toggles;
+    Object.keys(_toggleState).forEach(function(group){
+      var val=_toggleState[group];
+      document.querySelectorAll('.toggle-option[data-group="'+group+'"]').forEach(function(o){
+        o.classList.toggle('selected',o.dataset.val===val);
+      });
+    });
+  }
+  if(state.yn){Object.keys(state.yn).forEach(function(k){_ynState[k]=state.yn[k];});buildYN('yn_site',siteQuestions);}
+  if(state.checks){Object.keys(state.checks).forEach(function(k){_checkState[k]=state.checks[k];});rebuildChecks();}
+  if(typeof state.compliance!=='undefined'){
+    _compliance=state.compliance;
+    var el=document.getElementById('complianceCheck');
+    if(el)el.classList.toggle('checked',_compliance);
+  }
+  updateProgress();
+}
+
+function rebuildChecks(){
+  buildCheckItems('cl_missionType',missionTypeItems);
+  buildCheckItems('cl_deliverables',deliverableItems);
+}
+
+function clearAll(){
+  _toggleState={permission:null,timeOfDay:null,ownerPresent:null,rawUpgrade:null};
+  _ynState={};_checkState={};_compliance=false;
+  document.querySelectorAll('input[id],textarea[id],select[id]').forEach(function(el){
+    if(el.id&&el.id!=='importInput')el.value='';
+  });
+  document.querySelectorAll('.toggle-option').forEach(function(o){o.classList.remove('selected');});
+  var cc=document.getElementById('complianceCheck');if(cc)cc.classList.remove('checked');
+  rebuildChecks();
+  buildYN('yn_site',siteQuestions);
+  updateProgress();
+}
+
+function newBrief(){
+  if(!confirm('Start a new brief? Any unsaved changes will be lost.'))return;
+  _currentName=null;clearAll();
+  document.getElementById('saveName').value='';
+  document.getElementById('sec0').classList.remove('collapsed');
+  window.scrollTo({top:0,behavior:'smooth'});
+  renderSaved(null);
+}
+
+function saveBrief(){
+  var name=document.getElementById('saveName').value.trim()||v('f_firstName')+' '+v('f_lastName');
+  name=name.trim();
+  if(!name){alert('Please enter a Brief Name in the Save field.');return;}
+  _currentName=name;
+  var briefs=getBriefs();
+  var existing=briefs.findIndex(function(m){return m.name===name;});
+  var entry={name:name,date:v('f_missionDate')||new Date().toISOString().slice(0,10),updated:new Date().toISOString(),state:collectState()};
+  if(existing>=0){briefs[existing]=entry;}else{briefs.unshift(entry);}
+  saveBriefs(briefs);
+  document.getElementById('saveName').value=name;
+  renderSaved(name);
+  var btn=document.getElementById('btnSave');
+  if(btn){btn.textContent='Saved ✓';btn.style.background='var(--success)';setTimeout(function(){btn.textContent='Save Brief';btn.style.background='';},2000);}
+}
+
+function renderSaved(activeName){
+  var briefs=getBriefs();
+  var list=document.getElementById('loaderList');if(!list)return;
+  if(briefs.length===0){list.innerHTML='<div style="font-size:0.82rem;color:var(--muted);padding:8px 0;">No saved briefs yet.</div>';return;}
+  list.innerHTML='';
+  briefs.forEach(function(m){
+    var row=document.createElement('div');
+    row.className='saved-row'+(m.name===activeName?' active':'');
+    var d=m.date?new Date(m.date).toLocaleDateString('en-AU',{day:'2-digit',month:'short',year:'numeric'}):'';
+    var upd=m.updated?new Date(m.updated).toLocaleString('en-AU',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'';
+    row.innerHTML='<div class="saved-info"><span class="saved-name">'+escHtml(m.name)+'</span><span class="saved-meta">'+d+(upd?' — Saved '+upd:'')+'</span></div>'+
+      '<div class="saved-actions">'+
+      '<button class="saved-btn load" onclick="loadBrief(\''+escAttr(m.name)+'\')">Load</button>'+
+      '<button class="saved-btn del" onclick="deleteBrief(\''+escAttr(m.name)+'\')">Delete</button>'+
+      '</div>';
+    list.appendChild(row);
+  });
+}
+
+function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function escAttr(s){return String(s).replace(/'/g,'&#39;');}
+
+function toggleLoader(){
+  var list=document.getElementById('loaderList');
+  var btn=document.getElementById('btnLoadBrief');
+  if(!list)return;
+  var showing=list.style.display!=='none';
+  list.style.display=showing?'none':'block';
+  if(btn)btn.classList.toggle('active',!showing);
+  if(!showing)renderSaved(_currentName);
+}
+
+function loadBrief(name){
+  var briefs=getBriefs();
+  var m=briefs.find(function(x){return x.name===name;});
+  if(!m)return;
+  if(!confirm('Load "'+name+'"? Current unsaved changes will be lost.'))return;
+  clearAll();restoreState(m.state);
+  _currentName=name;
+  document.getElementById('saveName').value=name;
+  document.getElementById('loaderList').style.display='none';
+  document.getElementById('btnLoadBrief').classList.remove('active');
+  renderSaved(name);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function deleteBrief(name){
+  if(!confirm('Delete "'+name+'"? This cannot be undone.'))return;
+  var briefs=getBriefs().filter(function(m){return m.name!==name;});
+  saveBriefs(briefs);
+  if(_currentName===name)_currentName=null;
+  renderSaved(_currentName);
+}
+
+// ─── EXPORT / IMPORT ─────────────────────────────────────────
+function exportBrief(){
+  var name=_currentName||v('f_firstName')+' '+v('f_lastName')||'mission-brief';
+  name=name.trim()||'mission-brief';
+  var data={name:name,exported:new Date().toISOString(),version:'1.0',state:collectState()};
+  var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');a.href=url;a.download=name.replace(/[^a-zA-Z0-9_-]/g,'-')+'.json';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+}
+
+function importBrief(input){
+  if(!input.files||!input.files[0])return;
+  var file=input.files[0];
+  var reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      var data=JSON.parse(e.target.result);
+      if(!data.state)throw new Error('bad');
+      if(!confirm('Load "'+( data.name||'Brief')+'"? This replaces everything on screen.'))return;
+      clearAll();restoreState(data.state);
+      if(data.name){document.getElementById('saveName').value=data.name;_currentName=data.name;}
+      updateProgress();window.scrollTo({top:0,behavior:'smooth'});
+    }catch(err){alert('Could not read that file. Make sure it was exported from this app.');}
+  };
+  reader.readAsText(file);
+  input.value='';
+}
+
+// ─── COLLECT FORM DATA ───────────────────────────────────────
+function collectFormData(){
+  var missionTypes=[];
+  var st=_checkState['cl_missionType']||{};
+  missionTypeItems.forEach(function(item,i){if(st[i])missionTypes.push(item);});
+  var deliverables=[];
+  var ds=_checkState['cl_deliverables']||{};
+  deliverableItems.forEach(function(item,i){if(ds[i])deliverables.push(item);});
+  var ynSt=_ynState['yn_site']||{};
+  return{
+    firstName:v('f_firstName'),lastName:v('f_lastName'),
+    email:v('f_email'),phone:v('f_phone'),company:v('f_company'),
+    address:v('f_address'),suburb:v('f_suburb'),state:v('f_state'),propertyType:v('f_propertyType'),
+    siteAccess:v('f_siteAccess'),coords:v('f_coords'),
+    onSiteName:v('f_onSiteName'),onSitePhone:v('f_onSitePhone'),onSiteRole:v('f_onSiteRole'),
+    sec2Name:v('f_sec2Name'),sec2Phone:v('f_sec2Phone'),sec2Role:v('f_sec2Role'),
+    contactNotes:v('n_contacts'),
+    permission:_toggleState.permission||'',permissionNotes:v('f_permissionNotes'),
+    missionDate:v('f_missionDate'),altDate:v('f_altDate'),
+    timeOfDay:_toggleState.timeOfDay||'',duration:v('f_duration'),deadline:v('f_deadline'),
+    ownerPresent:_toggleState.ownerPresent||'',
+    missionTypes:missionTypes,missionTypeOther:v('f_missionTypeOther'),
+    deliverables:deliverables,rawUpgrade:_toggleState.rawUpgrade||'',turnaround:v('f_turnaround'),specificShots:v('f_specificShots'),
+    hazards:ynSt[0]||'',powerlines:ynSt[1]||'',animals:ynSt[2]||'',
+    restricted:ynSt[3]||'',neighbours:ynSt[4]||'',children:ynSt[5]||'',workers:ynSt[6]||'',
+    siteHazardNotes:v('n_siteHazards'),
+    additionalNotes:v('f_additionalNotes'),
+    compliance:_compliance
+  };
+}
+
+// ─── GENERATE PILOT CHECKLIST ────────────────────────────────
+function generateChecklist(){
+  var d=collectFormData();
+  var name=(d.firstName+' '+d.lastName).trim()||'Client';
+  var location=[d.address,d.suburb,d.state].filter(Boolean).join(', ')||'—';
+  var missionDate=d.missionDate||'—';
+
+  var hasHazards=d.hazards==='yes';
+  var hasPowerlines=d.powerlines==='yes';
+  var hasAnimals=d.animals==='yes';
+  var hasRestricted=d.restricted==='yes';
+  var hasNeighbours=d.neighbours==='yes';
+  var hasChildren=d.children==='yes';
+  var hasWorkers=d.workers==='yes';
+  var anyFlag=hasHazards||hasPowerlines||hasAnimals||hasRestricted||hasNeighbours||hasChildren||hasWorkers;
+
+  var permLabels={owner:'Property Owner',authorised:'Written Authorisation',council:'Public Land / Council Approval',other:'Other'};
+
+  function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function fr(l,val){if(!val)return'';return'<tr><td style="font-weight:600;padding:4px 10px 4px 0;color:#555;white-space:nowrap;vertical-align:top;font-size:12px;">'+l+'</td><td style="padding:4px 0;font-size:12px;">'+esc(val)+'</td></tr>';}
+  function h2(t){return'<h2 style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#0099FF;margin:22px 0 8px;padding-bottom:4px;border-bottom:1px solid #e0e8f0;">'+t+'</h2>';}
+  function checklist(items){
+    return'<div style="display:flex;flex-direction:column;">'+items.map(function(item,i){
+      return'<div style="display:flex;align-items:flex-start;gap:10px;padding:7px 10px;border-bottom:1px solid #f0f0f0;font-size:12px;">'+
+        '<div style="width:16px;height:16px;min-width:16px;border:1.5px solid #ccc;border-radius:3px;margin-top:1px;flex-shrink:0;"></div>'+
+        '<span style="line-height:1.4;color:#111;">'+esc(item)+'</span>'+
+        '</div>';
+    }).join('')+'</div>';
+  }
+  function ynBadge(val){
+    if(val==='yes')return'<span style="padding:2px 9px;border-radius:99px;font-size:10px;font-weight:700;background:#e8f7ee;color:#1a8048;">YES</span>';
+    if(val==='no')return'<span style="padding:2px 9px;border-radius:99px;font-size:10px;font-weight:700;background:#fdf0f0;color:#c0392b;">NO</span>';
+    return'<span style="color:#888;font-size:10px;">—</span>';
+  }
+
+  var html='<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Pilot Checklist — '+esc(name)+'</title>';
+  html+='<style>';
+  html+='*{box-sizing:border-box;margin:0;padding:0;}';
+  html+='body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:13px;color:#111;background:#f5f7fa;}';
+  html+='main{max-width:800px;margin:0 auto;padding:20px 20px 60px;}';
+  html+='.logo{font-size:28px;font-weight:300;letter-spacing:-0.5px;margin-bottom:2px;}';
+  html+='.blue-line{height:1.5px;background:#0099FF;margin:10px 0;}';
+  html+='.section{background:#fff;border:1px solid #e0e8f0;border-radius:8px;margin-bottom:14px;overflow:hidden;}';
+  html+='.section-header{background:#fff;border-bottom:1px solid #e0e8f0;padding:10px 18px;display:flex;align-items:center;gap:10px;}';
+  html+='.section-num{background:#e0f2ff;color:#0077cc;font-weight:700;font-size:0.75rem;width:24px;height:24px;border-radius:4px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}';
+  html+='.section-title{font-size:0.82rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#111;}';
+  html+='.section-body{padding:16px 18px;}';
+  html+='.alert-bar{display:flex;align-items:flex-start;gap:10px;padding:9px 14px;border-radius:5px;margin-bottom:8px;font-size:12px;line-height:1.4;}';
+  html+='.alert-bar.warn{background:#fff8e0;border:1px solid #ffe082;color:#7a5800;}';
+  html+='.alert-bar.danger{background:#fdf0f0;border:1px solid #f5c6c6;color:#c0392b;}';
+  html+='.sign-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}';
+  html+='.sign-field label{font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#0099FF;display:block;margin-bottom:4px;}';
+  html+='.sign-field input{width:100%;border:none;border-bottom:1.5px solid #ccc;padding:6px 0;font-size:13px;background:transparent;outline:none;}';
+  html+='footer{text-align:center;padding:16px;color:#888;font-size:11px;border-top:1px solid #e0e8f0;background:#fff;margin-top:10px;}';
+  html+='@media print{body{background:white!important;}.action-wrap{display:none!important;}}';
+  html+='</style></head><body>';
+
+  html+='<main>';
+  html+='<div class="logo">REKON<span style="color:#0099FF;">©</span> | MISSION BRIEF</div>';
+  html+='<div style="font-size:11px;color:#888;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px;">RPA Aerial Services — Pilot Checklist</div>';
+  html+='<div class="blue-line"></div>';
+  html+='<div style="background:#fff;border:1px solid #e0e8f0;border-radius:8px;padding:14px 18px;margin-bottom:16px;">';
+  html+='<div style="font-size:16px;font-weight:300;margin-bottom:8px;">'+esc(name)+(d.company?' — '+esc(d.company):'')+'</div>';
+  html+='<table>'+fr('Mission Date',missionDate)+fr('Location',location)+fr('On-Site Contact',d.onSiteName+(d.onSitePhone?' / '+d.onSitePhone:''))+fr('Permission',permLabels[d.permission]||d.permission||'—')+'</table>';
+  html+='</div>';
+
+  // Alerts
+  if(anyFlag){
+    html+='<div style="margin-bottom:16px;">';
+    html+='<div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#c0392b;margin-bottom:8px;">⚠ Site Flags from Client Brief</div>';
+    if(hasHazards)html+='<div class="alert-bar danger"><span>⚠</span><span><strong>Known hazards on site</strong> — Review client notes before mission.</span></div>';
+    if(hasPowerlines)html+='<div class="alert-bar danger"><span>⚡</span><span><strong>Power lines / antennas present</strong> — Map clearance and plan flight path accordingly.</span></div>';
+    if(hasAnimals)html+='<div class="alert-bar warn"><span>🐄</span><span><strong>Animals or livestock on/near property</strong> — Minimise disturbance, plan flight path away from animals.</span></div>';
+    if(hasRestricted)html+='<div class="alert-bar danger"><span>🚫</span><span><strong>Restricted areas flagged</strong> — Verify boundaries with client and check CASA before launch.</span></div>';
+    if(hasNeighbours)html+='<div class="alert-bar warn"><span>🏘</span><span><strong>Neighbouring properties noted</strong> — Be aware of adjacent boundaries during flight.</span></div>';
+    if(hasChildren)html+='<div class="alert-bar danger"><span>👶</span><span><strong>Children may be present on site</strong> — Establish exclusion zone, brief client prior to flight.</span></div>';
+    if(hasWorkers)html+='<div class="alert-bar warn"><span>👷</span><span><strong>Active workers or crew on site</strong> — Coordinate with site supervisor, establish clear exclusion zones.</span></div>';
+    if(d.siteHazardNotes)html+='<div class="alert-bar warn"><span>📋</span><span><strong>Client hazard notes:</strong> '+esc(d.siteHazardNotes)+'</span></div>';
+    html+='</div>';
+  }
+
+  // SECTION A
+  html+='<div class="section">';
+  html+='<div class="section-header"><div class="section-num">A</div><div class="section-title">Pre-Mission Admin</div></div>';
+  html+='<div class="section-body">';
+  html+=checklist([
+    'Mission brief received and reviewed',
+    'Client identity confirmed: '+esc(name)+(d.company?' ('+esc(d.company)+')':''),
+    'Property permission confirmed: '+esc(permLabels[d.permission]||d.permission||'—'),
+    'On-site contact confirmed: '+esc(d.onSiteName||'—')+' / '+esc(d.onSitePhone||'—'),
+    'Mission date and time confirmed with client: '+esc(missionDate)+(d.timeOfDay?' ('+esc(d.timeOfDay)+')':''),
+    'Deliverables and turnaround confirmed: '+(d.deliverables.length?esc(d.deliverables.join(', ')):'Not specified'),
+    'Invoice / quote sent and payment terms agreed'
+  ]);
+  html+='</div></div>';
+
+  // SECTION B
+  html+='<div class="section">';
+  html+='<div class="section-header"><div class="section-num">B</div><div class="section-title">Airspace &amp; Regulatory</div></div>';
+  html+='<div class="section-body">';
+  html+=checklist([
+    'CASA airspace check completed for: '+esc(location),
+    'Airspace class confirmed — check for CTR, hospital zones, restrictions',
+    'NOTAM check completed',
+    'ATC / CTAF contact noted if operating near controlled airspace',
+    'Flight operating height confirmed within legal limits (120m AGL)',
+    'Visual line of sight (VLOS) confirmed for planned area',
+    'Day VFR conditions confirmed — no night operations unless approved',
+    hasRestricted?'⚠ RESTRICTED AREA FLAGGED BY CLIENT — verify with CASA before launch':'No restricted areas flagged by client'
+  ]);
+  html+='</div></div>';
+
+  // SECTION C
+  html+='<div class="section">';
+  html+='<div class="section-header"><div class="section-num">C</div><div class="section-title">Weather Assessment</div></div>';
+  html+='<div class="section-body">';
+  html+=checklist([
+    'BOM forecast checked for mission date: '+esc(missionDate),
+    'Wind speed confirmed below aircraft limits (Mavic 3: <10.7 m/s / 38 km/h)',
+    'No active thunderstorm or severe weather warnings',
+    'Visibility confirmed adequate for safe VLOS operations',
+    'Contingency / backup date noted: '+esc(d.altDate||'None provided')
+  ]);
+  html+='<div style="margin-top:12px;"><label style="font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#0099FF;display:block;margin-bottom:4px;">Weather Notes</label>';
+  html+='<textarea style="width:100%;border:1px solid #e0e8f0;border-radius:5px;padding:8px;font-size:12px;min-height:50px;background:#f0f4f8;" placeholder="Wind: ___ km/h  Temp: ___°C  Conditions: …"></textarea></div>';
+  html+='</div></div>';
+
+  // SECTION D
+  html+='<div class="section">';
+  html+='<div class="section-header"><div class="section-num">D</div><div class="section-title">Site Assessment</div></div>';
+  html+='<div class="section-body">';
+  html+=checklist([
+    (hasHazards?'⚠ HAZARDS FLAGGED — ':'')+'Site hazards reviewed and assessed',
+    (hasPowerlines?'⚡ CONFIRMED PRESENT — ':'')+'Power lines / antennas mapped and flight path planned',
+    (hasAnimals?'🐄 CONFIRMED PRESENT — ':'')+'Animal / livestock impact assessed',
+    (hasChildren?'👶 CHILDREN MAY BE PRESENT — ':'')+'People on site briefed — exclusion zone established',
+    (hasWorkers?'👷 ACTIVE WORKERS ON SITE — ':'')+'Workers / crew coordinated — site supervisor briefed',
+    (hasNeighbours?'⚠ NOTED — ':'')+'Neighbouring property boundaries identified',
+    'Takeoff / landing zone identified and cleared',
+    'GPS / coordinates confirmed: '+esc(d.coords||'Not provided'),
+    'Site access route confirmed: '+esc(d.siteAccess||'No special access noted')
+  ]);
+  html+='</div></div>';
+
+  // SECTION E
+  html+='<div class="section">';
+  html+='<div class="section-header"><div class="section-num">E</div><div class="section-title">Aircraft &amp; Equipment</div></div>';
+  html+='<div class="section-body">';
+  html+=checklist([
+    'Aircraft registration current and visible',
+    'Batteries fully charged and capacity checked',
+    'Propellers inspected — no damage or cracks',
+    'Gimbal and camera checked — lens cover removed',
+    'SD cards formatted and sufficient storage confirmed',
+    'Controller firmware and aircraft firmware up to date',
+    'RTH altitude set correctly for site obstacles',
+    'Spare batteries packed',
+    'First aid kit packed'
+  ]);
+  html+='</div></div>';
+
+  // SECTION F
+  html+='<div class="section">';
+  html+='<div class="section-header"><div class="section-num">F</div><div class="section-title">Mission Execution</div></div>';
+  html+='<div class="section-body">';
+  html+=checklist([
+    'On-site contact met and briefed: '+esc(d.onSiteName||'—'),
+    'Pre-flight checklist complete',
+    'Compass calibration completed if required',
+    'GPS lock confirmed (8+ satellites)',
+    'Mission types confirmed: '+(d.missionTypes.length?esc(d.missionTypes.join(', ')):'—'),
+    'Specific shots briefed: '+esc(d.specificShots||'None specified'),
+    'All required footage captured before landing',
+    'Files backed up on-site before leaving'
+  ]);
+  html+='</div></div>';
+
+  // SECTION G
+  html+='<div class="section">';
+  html+='<div class="section-header"><div class="section-num">G</div><div class="section-title">Post-Mission</div></div>';
+  html+='<div class="section-body">';
+  html+=checklist([
+    'Files transferred and backed up (2+ copies)',
+    'Footage reviewed — all required shots confirmed captured',
+    'Editing / processing commenced if required',
+    'Delivery method prepared: '+(d.deliverables.length?esc(d.deliverables.join(', ')):'As briefed'),
+    'Turnaround target: '+esc(d.turnaround||'Not specified')+' — deadline: '+esc(d.deadline||'Not specified'),
+    'Deliverables delivered to client: '+esc(d.email||'—'),
+    'Invoice sent and payment confirmed',
+    'Mission log and flight logbook updated'
+  ]);
+  html+='<div style="margin-top:12px;"><label style="font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#0099FF;display:block;margin-bottom:4px;">Post-Mission Notes</label>';
+  html+='<textarea style="width:100%;border:1px solid #e0e8f0;border-radius:5px;padding:8px;font-size:12px;min-height:50px;background:#f0f4f8;" placeholder="Any issues, observations or follow-up items…"></textarea></div>';
+  html+='</div></div>';
+
+  // SIGN-OFF
+  html+='<div class="section">';
+  html+='<div class="section-header"><div class="section-num">✓</div><div class="section-title">Pilot Sign-Off</div></div>';
+  html+='<div class="section-body">';
+  html+='<div class="sign-row">';
+  html+='<div class="sign-field"><label>Pilot Name</label><input type="text" value="Patrice Roblin"></div>';
+  html+='<div class="sign-field"><label>Date of Flight</label><input type="text" value="'+esc(missionDate)+'"></div>';
+  html+='<div class="sign-field"><label>Signature</label><input type="text" placeholder="Sign here or print and sign"></div>';
+  html+='</div></div></div>';
+
+  html+='<div style="text-align:center;margin:24px 0;">';
+  html+='<button onclick="window.print()" style="background:#0099FF;color:#fff;font-size:0.95rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;border:none;padding:12px 28px;border-radius:6px;cursor:pointer;font-family:inherit;">🖨 Print Checklist</button>';
+  html+='</div>';
+
+  // Brief summary table
+  html+=h2('Client Brief Summary');
+  html+='<div style="background:#fff;border:1px solid #e0e8f0;border-radius:6px;padding:14px 16px;margin-bottom:10px;">';
+  html+='<table style="width:100%;border-collapse:collapse;">'+
+    fr('Client',d.firstName+' '+d.lastName+(d.company?' — '+d.company:''))+
+    fr('Email',d.email)+fr('Phone',d.phone)+
+    fr('Location',location)+fr('Coordinates',d.coords)+fr('Site Access',d.siteAccess)+
+    fr('On-Site Contact',d.onSiteName+' / '+d.onSitePhone+' ('+d.onSiteRole+')')+
+    fr('Permission',permLabels[d.permission]||d.permission)+
+    fr('Mission Date',missionDate)+fr('Alt Date',d.altDate)+fr('Time of Day',d.timeOfDay)+
+    fr('Duration',d.duration)+fr('Deadline',d.deadline)+
+    fr('Mission Types',d.missionTypes.join(', '))+
+    fr('Deliverables',d.deliverables.join(', '))+
+    fr('Turnaround',d.turnaround)+fr('Specific Shots',d.specificShots)+
+    fr('Additional Notes',d.additionalNotes)+
+    '</table></div>';
+
+  html+='<table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:10px;">';
+  siteQuestions.forEach(function(q,i){
+    var ynSt=(_ynState['yn_site']||{});
+    html+='<tr><td style="padding:5px 10px;border-bottom:1px solid #f0f0f0;">'+esc(q)+'</td><td style="padding:5px 10px;border-bottom:1px solid #f0f0f0;text-align:right;">'+ynBadge(ynSt[i])+'</td></tr>';
+  });
+  html+='</table>';
+  if(d.siteHazardNotes)html+='<div style="font-size:11px;color:#555;background:#fff8e0;border:1px solid #ffe082;border-radius:4px;padding:8px 12px;margin-bottom:10px;"><strong>Hazard Notes:</strong> '+esc(d.siteHazardNotes)+'</div>';
+
+  html+='</main>';
+  html+='<footer>&copy; 2026 Patrice Roblin | +61 0402 096 781 | roblinpatrice@gmail.com | patriceroblin.com</footer>';
+  html+='</body></html>';
+
+  var rw=window.open('','_blank');
+  if(rw){rw.document.open();rw.document.write(html);rw.document.close();}
+  else{alert('Pop-up blocked. Please allow pop-ups for this site and try again.');}
+}
+
+// ─── INIT ────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded',function(){
+  rebuildChecks();
+  buildYN('yn_site',siteQuestions);
+  updateProgress();
+  renderSaved(null);
+});
+</script>
+
+<!-- SERVICE WORKER -->
+<script>
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw-brief.js').catch(function(err){console.log('SW registration failed:',err);});
+}
+</script>
+
+</body>
+</html>
